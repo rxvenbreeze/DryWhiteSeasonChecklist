@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dry White Season Checklist & Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Permanent Marker', cursive;
+            background-color: #343a40;
+            background-image: linear-gradient( to bottom, #6c757d 0%, #495057 40%, #343a40 100% );
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 20px 10px; color: #333; box-sizing: border-box;
+        }
+        #countdown-timer {
+            display: none;
+            color: #ff0000;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 10px; /* Reduced margin as banner is now below */
+            padding: 15px 20px;
+            background-color: rgba(0,0,0,0.6);
+            border-radius: 8px;
+            text-align: center;
+            width: 100%;
+            max-width: 850px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
+            letter-spacing: 1px;
+        }
+        #at-risk-banner {
+            display: none;
+            width: 100%;
+            max-width: 850px;
+            background-color: #2a0000; /* Dark, ominous red background */
+            color: #ffcccc; /* Light, eerie red text */
+            border: 1px solid #5c0000; /* Darker red border */
+            box-shadow: 0 0 10px rgba(255,0,0,0.3); /* Faint red glow */
+            padding: 12px 15px;
+            margin-bottom: 20px; /* Space below the banner */
+            border-radius: 5px;
+            text-align: center;
+            font-size: 1.2em; /* Slightly larger for impact */
+        }
+        #at-risk-banner strong {
+            font-size: 1.3em;
+            color: #ff8080; /* Brighter red for the "AT RISK" part */
+        }
+        #checklist-wrapper, #chat-wrapper {
+            display: none; width: 100%; max-width: 850px; margin-bottom: 30px;
+            position: relative;
+        }
+        .content-container {
+            background-color: white; padding: 30px 20px; border-radius: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative; z-index: 2;
+        }
+        h1 {
+            font-size: 2.5em; text-align: center; margin-top: 0; margin-bottom: 5px; color: #222; line-height: 1;
+        }
+        .subtitle {
+            text-align: right; font-size: 1.0em; margin-top: -12px; margin-bottom: 8px; margin-right: 15px; color: #444; font-style: italic;
+        }
+        hr.title-line {
+            border: 0; height: 2px; background-color: #333; margin-bottom: 15px;
+        }
+        table {
+            width: 100%; border-collapse: collapse; margin-top: 10px;
+        }
+        th, td {
+            padding: 10px 5px; text-align: center; font-size: 1.0em; vertical-align: middle;
+        }
+        th.col-pampas { min-width: 90px; } th.col-leon { min-width: 45px; } th.col-teeg { min-width: 65px; }
+        th.col-whilcat { min-width: 65px; } th.col-dhc { min-width: 45px; } th.col-sleopard { min-width: 110px; }
+        th.col-turdl { min-width: 65px; }
+
+        th:not(:first-child), td:not(:first-child) { border-left: 2px dashed #555; }
+        td:first-child { text-align: left; font-weight: normal; padding-left: 5px; border-right: 2px solid #555; }
+        tr { border-bottom: 2px dashed #aaa; }
+        thead tr { border-bottom: 2px solid #333; }
+        tbody tr:last-child { border-bottom: none; }
+
+        .checkbox-cell { cursor: pointer; }
+        .checkbox-cell input[type="checkbox"] { transform: scale(1.6); cursor: pointer; accent-color: #333; display: inline-block; }
+        .checkbox-cell .red-x { font-family: Arial, sans-serif; font-size: 1.8em; color: red; font-weight: bold; display: none; line-height: 1; user-select: none; }
+        .checkbox-cell[data-state="x"] input[type="checkbox"] { display: none; }
+        .checkbox-cell[data-state="x"] .red-x { display: inline-block; }
+
+        .tape { position: absolute; background-color: rgba(210, 180, 140, 0.6); box-shadow: 0 1px 3px rgba(0,0,0,0.3); z-index: 3; }
+        .tape.tape-cl-top-left { top: -10px; left: 5%; width: 120px; height: 35px; transform: rotate(-6deg); }
+        .tape.tape-cl-top-right { top: -12px; right: 8%; width: 100px; height: 33px; transform: rotate(4deg); }
+        .tape.tape-cl-bottom-left { bottom: -15px; left: 10%; width: 90px; height: 30px; transform: rotate(5deg); }
+        .tape.tape-chat-top-center { top: -12px; left: 50%; transform: translateX(-50%) rotate(1deg); width: 150px; height: 35px; }
+        .tape.tape-chat-bottom-right { bottom: -10px; right: 5%; width: 100px; height: 30px; transform: rotate(-3deg); }
+
+        #password-prompt { text-align: center; padding: 20px; background-color: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); position: relative; z-index: 10; }
+        #password-prompt input[type="password"] { padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+        #password-prompt button { padding: 10px 20px; background-color: #5cb85c; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-family: 'Permanent Marker', cursive; }
+        #password-prompt button:hover { background-color: #4cae4c; }
+
+        #chat-container h2 { font-size: 1.8em; margin-bottom: 10px; text-align: center; }
+        #chat-messages { height: 200px; border: 1px solid #ccc; border-radius: 4px; overflow-y: auto; padding: 10px; margin-bottom: 10px; background-color: #f9f9f9; font-family: Arial, sans-serif; font-size: 0.9em; }
+        .chat-message { margin-bottom: 8px; padding: 5px; border-radius: 3px; }
+        .chat-message .sender { font-weight: bold; color: #007bff; }
+        .chat-message .timestamp { font-size: 0.75em; color: #777; margin-left: 10px; }
+        #chat-input-area { display: flex; }
+        #chat-name-input { padding: 8px; margin-right: 5px; border: 1px solid #ccc; border-radius: 4px; width: 100px; font-family: Arial, sans-serif; }
+        #chat-message-input { flex-grow: 1; padding: 8px; margin-right: 5px; border: 1px solid #ccc; border-radius: 4px; font-family: Arial, sans-serif; }
+        #chat-send-button { padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-family: 'Permanent Marker', cursive; }
+        #chat-send-button:hover { background-color: #0056b3; }
+
+        @media (max-width: 800px) {
+            #countdown-timer { font-size: 1.5em; padding: 10px 15px; }
+            #at-risk-banner { font-size: 1em; padding: 8px 10px; }
+            .content-container { padding: 15px 10px; }
+            h1 { font-size: 1.8em; } .subtitle { font-size: 0.8em; margin-right: 5px; margin-top: -10px; }
+            th, td { padding: 6px 2px; font-size: 0.7em; }
+            input[type="checkbox"] { transform: scale(1.2); }
+            .checkbox-cell .red-x { font-size: 1.4em; }
+            th.col-pampas, th.col-leon, th.col-teeg, th.col-whilcat, th.col-dhc, th.col-sleopard, th.col-turdl { min-width: auto; }
+            .tape { display: none; }
+            #chat-messages { height: 150px; } #chat-name-input { width: 80px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="password-prompt">
+        <h2>Enter Password</h2>
+        <input type="password" id="password-input" placeholder="Password">
+        <br>
+        <button onclick="checkPassword()">Enter</button>
+        <p id="password-error" style="color: red; display: none;">Incorrect password.</p>
+    </div>
+
+    <!-- Countdown Timer now comes BEFORE At Risk Banner -->
+    <div id="countdown-timer">Time until end of month: Calculating...</div>
+    <div id="at-risk-banner"></div>
+
+    <div id="checklist-wrapper">
+        <div class="tape tape-cl-top-left"></div> <div class="tape tape-cl-top-right"></div> <div class="tape tape-cl-bottom-left"></div>
+        <div class="checklist-container content-container">
+            <h1>Dry White Season</h1> <h1>Checklist</h1>
+            <div class="subtitle">stay weeeett!</div> <hr class="title-line">
+            <table>
+                <thead>
+                    <tr>
+                        <th><!-- Month --></th>
+                        <th class="col-pampas">Pampas</th> <th class="col-leon">Leon</th> <th class="col-teeg">Teeg</th>
+                        <th class="col-whilcat">Whilcat</th> <th class="col-dhc">DHC</th> <th class="col-sleopard">Sleopard</th>
+                        <th class="col-turdl">Turd'l</th>
+                    </tr>
+                </thead>
+                <tbody id="checklist-body">
+                    <tr><td colspan="8" style="text-align:center; padding: 20px;">Loading checklist...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="chat-wrapper">
+        <div class="tape tape-chat-top-center"></div> <div class="tape tape-chat-bottom-right"></div>
+        <div id="chat-container" class="content-container">
+            <h2>Chat Box</h2> <div id="chat-messages"></div>
+            <div id="chat-input-area">
+                <input type="text" id="chat-name-input" placeholder="Your Name">
+                <input type="text" id="chat-message-input" placeholder="Type a message...">
+                <button id="chat-send-button">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const CORRECT_PASSWORD = "pride4life";
+        let countdownIntervalId = null;
+        const monthAbbreviations = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        function checkPassword() {
+            const enteredPassword = document.getElementById('password-input').value;
+            const errorMsg = document.getElementById('password-error');
+            if (enteredPassword === CORRECT_PASSWORD) {
+                document.getElementById('password-prompt').style.display = 'none';
+                document.getElementById('countdown-timer').style.display = 'block';
+                document.getElementById('at-risk-banner').style.display = 'block'; // Keep it block, content will fill
+                document.getElementById('checklist-wrapper').style.display = 'block';
+                document.getElementById('chat-wrapper').style.display = 'block';
+                document.body.style.justifyContent = 'flex-start';
+                document.body.style.alignItems = 'center';
+                initializeAppFeatures();
+            } else { errorMsg.style.display = 'block'; document.getElementById('password-input').value = ''; }
+        }
+        document.getElementById('password-input').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { event.preventDefault(); checkPassword(); }
+        });
+
+        function updateCountdown() { /* ... (same as before) ... */
+            const now = new Date(); const currentYear = now.getFullYear(); const currentMonth = now.getMonth();
+            const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
+            const timeLeft = endOfMonth - now;
+            if (timeLeft < 0) { document.getElementById('countdown-timer').textContent = "Month has ended!"; if (countdownIntervalId) clearInterval(countdownIntervalId); return; }
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24)); const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60)); const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+            document.getElementById('countdown-timer').textContent = `End of Month In: ${days}d ${hours}h ${minutes}m ${seconds}s`;
+        }
+
+        function initializeAppFeatures() {
+            console.log("App features script started AFTER password entry.");
+            updateCountdown();
+            countdownIntervalId = setInterval(updateCountdown, 1000);
+
+            const firebaseConfig = { /* ... (same firebaseConfig) ... */
+                apiKey: "AIzaSyA40XaGlDrUyWBvqdllnw1ypY9D_sUERYQ", authDomain: "drywhiteseasonchecklist.firebaseapp.com",
+                databaseURL: "https://drywhiteseasonlist-default-rtdb.firebaseio.com/", projectId: "drywhiteseasonchecklist",
+                storageBucket: "drywhiteseasonchecklist.firebasestorage.app", messagingSenderId: "226124944736",
+                appId: "1:226124944736:web:f1919aaf924612d3f37a05", measurementId: "G-H5LLZPW5CK"
+            };
+
+            try {
+                if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+                const database = firebase.database();
+                const checklistRef = database.ref('checklistState');
+                const chatRef = database.ref('chatMessages');
+
+                const categories = [
+                    { id: "pampas", displayName: "Pampas" }, { id: "lion", displayName: "Leon" },
+                    { id: "teague", displayName: "Teeg" }, { id: "wildcat", displayName: "Whilcat" },
+                    { id: "dhc", displayName: "DHC" }, { id: "snowleopard", displayName: "Sleopard" },
+                    { id: "turtle", displayName: "Turd'l" }
+                ];
+                const initialChecksFromImage = { /* ... (same initialChecksFromImage) ... */
+                    "pampas-Jan": true, "pampas-Feb": true, "pampas-Mar": true, "pampas-Apr": true, "pampas-May": true,
+                    "lion-Jan": true, "lion-Feb": true, "lion-Mar": true, "lion-Apr": true, "lion-May": true,
+                    "teague-Jan": true, "teague-Feb": true, "teague-Mar": true, "teague-Apr": true,
+                    "wildcat-Jan": true, "wildcat-Mar": true, "wildcat-Apr": true, "wildcat-May": true,
+                    "dhc-Jan": true, "dhc-Mar": true, "dhc-Apr": true
+                };
+                const tableBody = document.getElementById('checklist-body');
+                const atRiskBannerEl = document.getElementById('at-risk-banner'); // Renamed for clarity
+
+                function updateAtRiskBanner(checklistData) {
+                    const now = new Date();
+                    const currentMonthAbbr = monthAbbreviations[now.getMonth()];
+                    let atRiskNames = [];
+
+                    categories.forEach(category => {
+                        const itemId = `${category.id}-${currentMonthAbbr}`;
+                        const itemState = checklistData[itemId];
+                        if (itemState === false || typeof itemState === 'undefined') {
+                            atRiskNames.push(category.displayName);
+                        }
+                    });
+
+                    if (atRiskNames.length > 0) {
+                        atRiskBannerEl.innerHTML = `<strong>AT RISK of Dry White Season:</strong> ${atRiskNames.join(', ')}`;
+                        atRiskBannerEl.style.backgroundColor = "#2a0000"; // Ominous dark red
+                        atRiskBannerEl.style.color = "#ffcccc"; // Light eerie red
+                        atRiskBannerEl.style.borderColor = "#5c0000";
+                    } else {
+                        atRiskBannerEl.innerHTML = `<strong>All Clear!</strong> Everyone is safe this month.`;
+                        atRiskBannerEl.style.backgroundColor = "#d4edda"; // Greenish "safe" color
+                        atRiskBannerEl.style.color = "#155724";
+                        atRiskBannerEl.style.borderColor = "#c3e6cb";
+                    }
+                    atRiskBannerEl.style.display = 'block'; // Ensure it's visible
+                }
+
+                function setupEventListeners(cell, checkboxId) { /* ... (same as before) ... */
+                    const checkbox = cell.querySelector('input[type="checkbox"]');
+                    checkbox.addEventListener('click', function(event) { if (event.detail === 1) { let newState; const currentCellState = cell.dataset.state; if (currentCellState === "checked" || currentCellState === "x") { newState = false; cell.dataset.state = "unchecked"; this.checked = false; } else { newState = true;  cell.dataset.state = "checked"; this.checked = true; } handleCheckboxChange(this.id, newState); } });
+                    cell.addEventListener('dblclick', function() { let newState; const currentCellState = this.dataset.state; const chkBox = this.querySelector('input[type="checkbox"]'); if (currentCellState === "x") { newState = false; this.dataset.state = "unchecked"; chkBox.checked = false; } else { newState = "x"; this.dataset.state = "x"; chkBox.checked = true; } handleCheckboxChange(chkBox.id, newState); });
+                }
+                function renderTable(currentChecklistState) { /* ... (same as before, calls setupEventListeners) ... */
+                    tableBody.innerHTML = ''; if (!currentChecklistState || Object.keys(currentChecklistState).length === 0) { currentChecklistState = {}; }
+                    monthAbbreviations.forEach((month) => { const row = tableBody.insertRow(); row.insertCell().textContent = month; categories.forEach(category => { const cell = row.insertCell(); cell.classList.add('checkbox-cell'); const checkboxId = `${category.id}-${month}`; const currentState = currentChecklistState[checkboxId]; const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.id = checkboxId; checkbox.checked = (currentState === true || currentState === "x"); const redXSpan = document.createElement('span'); redXSpan.classList.add('red-x'); redXSpan.textContent = '✕'; cell.appendChild(checkbox); cell.appendChild(redXSpan); if (currentState === "x") { cell.dataset.state = "x"; } else if (currentState === true) { cell.dataset.state = "checked"; } else { cell.dataset.state = "unchecked"; } setupEventListeners(cell, checkboxId); }); });
+                    console.log("Table rendered."); updateAtRiskBanner(currentChecklistState);
+                }
+                function handleCheckboxChange(checkboxId, newState) { /* ... (same as before) ... */
+                    console.log(`Checklist item ${checkboxId} changed to ${newState}. Updating Firebase.`); const updates = {}; updates[checkboxId] = newState; checklistRef.update(updates).catch(error => console.error("Error updating checklist:", error));
+                }
+                checklistRef.on('value', (snapshot) => { /* ... (same as before) ... */
+                    const data = snapshot.val(); if (data === null) { const initialState = {}; monthAbbreviations.forEach(m => categories.forEach(c => initialState[`${c.id}-${m}`] = initialChecksFromImage[`${c.id}-${m}`] || false)); checklistRef.set(initialState).catch(e => tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:red;">Error populating: ${e.message}</td></tr>`); }
+                    else { renderTable(data); }
+                }, (err) => tableBody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:20px; color:red;">DB Error: ${err.message}</td></tr>`);
+
+                // --- Chat Logic ---
+                /* ... (Chat logic remains identical) ... */
+                const chatMessagesDiv = document.getElementById('chat-messages'); const nameInput = document.getElementById('chat-name-input'); const messageInput = document.getElementById('chat-message-input'); const sendButton = document.getElementById('chat-send-button'); nameInput.value = localStorage.getItem('chatName') || ''; sendButton.addEventListener('click', sendMessage); messageInput.addEventListener('keypress', function(event) { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendMessage(); } }); function sendMessage() { const name = nameInput.value.trim(); const text = messageInput.value.trim(); if (text === "" || name === "") { if(name === "") alert("Please enter your name."); if(text === "") alert("Please enter a message."); return; } localStorage.setItem('chatName', name); const messageData = { name: name, text: text, timestamp: firebase.database.ServerValue.TIMESTAMP }; chatRef.push(messageData).then(() => { messageInput.value = ""; }).catch(error => console.error("Error sending message:", error)); } chatRef.on('child_added', (snapshot) => { const message = snapshot.val(); displayMessage(message.name, message.text, message.timestamp); }); function displayMessage(name, text, timestamp) { const messageDiv = document.createElement('div'); messageDiv.classList.add('chat-message'); const senderSpan = document.createElement('span'); senderSpan.classList.add('sender'); senderSpan.textContent = name + ": "; const textNode = document.createTextNode(text); messageDiv.appendChild(senderSpan); messageDiv.appendChild(textNode); if (timestamp) { const timeSpan = document.createElement('span'); timeSpan.classList.add('timestamp'); timeSpan.textContent = `(${new Date(timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})`; messageDiv.appendChild(timeSpan); } chatMessagesDiv.appendChild(messageDiv); chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight; }
+
+            } catch (e) { /* ... (same catch block) ... */ }
+            console.log("App features script finished initial setup process.");
+        }
+    </script>
+</body>
+</html>
